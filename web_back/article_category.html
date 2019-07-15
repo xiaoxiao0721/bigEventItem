@@ -238,6 +238,8 @@
                     $('#addModal').modal('hide');
 
                 })
+
+
             }
 
             // 弹出框
@@ -278,10 +280,37 @@
 
                 } else {
                     // 做新增的事情
-                    addCate()
+                    var catName = $('#catName').val().trim()
+                    var catSlug = $('#catSlug').val().trim()
+
+                    if (catName == '' || catSlug == '') {
+
+                        $('#myModal').modal();
+
+                        $('.btn-confirm').click(function () {
+                            $('#myModal').modal('hide');
+
+                        })
+                    }
+
+                    $.post({
+                        url: 'http://localhost:8000/admin/category_add',
+                        data: {
+                            name: catName,
+                            slug: catSlug
+                        },
+                        success: function (res) {
+                            getData();
+
+                        }
+                    })
+
+                    $('#addModal').modal('hide');
+
                 }
 
             })
+
 
 
 
@@ -332,12 +361,14 @@
                 }
             })
 
-
-            // 新增分类的模态框复原
-            $('#btnAddCate').on('click', function () {
+            // 新增分类还原
+            $('.btnAddCate').on('click', function () {
                 $('#addModal .modal-title').html('新增分类');
                 $('#model_add').text('新增').removeClass('btn-success');
+                $('#catName').val('');
+                $('#catSlug').val('');
             })
+
 
 
         })
