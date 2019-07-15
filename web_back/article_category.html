@@ -137,7 +137,7 @@
             <td class="text-center">
                 <a href="javascript:editTr({&quot;id&quot;:&quot;1&quot;,&quot;slug&quot;:&quot;uncategorized&quot;,&quot;name&quot;:&quot;未分类&quot;});"
                     class="btn btn-info btn-xs">编辑</a>
-                <a href="javascript:deleteTr( {{v.id}} );" class="btn btn-danger btn-xs">删除</a>
+                <a href="#" data-id="{{v.id}}" class="btn btn-danger btn-xs btn-del">删除</a>
             </td>
        </tr>
     {{/each}}
@@ -145,7 +145,7 @@
     </script>
 
     <!-- 准备一个添加的模板 -->
-    <script type="text/html" id="tpl02">
+    <!-- <script type="text/html" id="tpl02">
         <tr>
                 <td>{{name}}</td>
                 <td>{{slug}}</td>
@@ -155,45 +155,49 @@
                     <a href="javascript:deleteTr( 1 );" class="btn btn-danger btn-xs">删除</a>
                 </td>
            </tr>
-    </script>
+    </script> -->
     <script>
         $('#addModal').modal({
             show: false,
             backdrop: false
         });
 
-        $('.category_table').delegate('a', 'click', function () {
-            if ($(this).hasClass('btn-info')) {
-                $('#addModal .modal-title').html('修改分类名称');
-                $('#addModal').modal('show');
-            }
-        })      
+        // 编辑按钮的弹出框
+        // $('.category_table').delegate('a', 'click', function () {
+        //     if ($(this).hasClass('btn-info')) {
+        //         $('#addModal .modal-title').html('修改分类名称');
+        //         $('#addModal').modal('show');
+        //     }
+        // })      
     </script>
 
     <script>
+        // 入口函数
         $(function () {
-            // 入口函数
             // 文章类别搜索
-            $.get({
-                url: 'http://localhost:8000/admin/category_search',
-                success: function (res) {
-                    // console.log(res);
-                    if (res.code == 200) {
-                        var html = template('tpl', res)
-                        $('tbody').html(html)
+            function getData() {
+                $.get({
+                    url: 'http://localhost:8000/admin/category_search',
+                    success: function (res) {
+                        // console.log(res);
+                        if (res.code == 200) {
+                            var html = template('tpl', res)
+                            $('tbody').html(html)
+                        }
                     }
-                }
-            })
+                })
+            }
+            getData()
+
 
             // 新增文章类别
-
             $('#model_add').on('click', function () {
 
                 var catName = $('#catName').val().trim()
                 var catSlug = $('#catSlug').val().trim()
 
                 if (catName == '' || catSlug == '') {
-                    
+
                     $('#myModal').modal();
 
                     $('.btn-confirm').click(function () {
@@ -210,17 +214,21 @@
                     },
                     success: function (res) {
                         // console.log(res);
+                        // 1.  location.reload()
 
-                        if (res.code == 200) {
-                            var obj = {
-                                name: catName,
-                                slug: catSlug
-                            }
-                            var catename = template('tpl02', obj)
-                            $('tbody').append(catename)
+                        // 2.  重新发送ajax请求
+                        getData();
 
-                        }
+                        // 3. 直接操作DOM树
+                        // if (res.code == 200) {
+                        //     var obj = {
+                        //         name: catName,
+                        //         slug: catSlug
+                        //     }
+                        //     var catename = template('tpl02', obj)
+                        //     $('tbody').append(catename)
 
+                        // }
                     }
                 })
 
@@ -228,10 +236,37 @@
 
             })
 
+            // 弹出框
             $('#model_shutoff').click(function () {
                 // alert('shutoff');
                 $('#addModal').modal('hide');
             });
+
+
+            // 删除文章类别
+            $('tbody').on('click', '.btn-del', function (e) {
+                e.preventDefault()
+
+                var that = $(this);
+                var delID = $(this).attr('data-id')
+                // console.log(delID)
+                $.ajax({
+                    type: 'post',
+                    url: 'http://localhost:8000/admin/category_delete',
+                    data: { id: delID },
+                    success: function (res) {
+                        // console.log(res);
+                        if (res.code == 200) {
+                            if (confirm('确认删除?')) {
+                                that.parents('tr').remove();
+                            }
+                        }
+
+                    }
+                })
+
+            })
+
 
 
         })
