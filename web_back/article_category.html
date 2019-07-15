@@ -72,7 +72,8 @@
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-center">
-                            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#addModal">新增分类</a>
+                            <a href="#" class="btn btn-success btnAddCate" data-toggle="modal"
+                                data-target="#addModal">新增分类</a>
                         </td>
                     </tr>
                 </tfoot>
@@ -89,13 +90,14 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        <input type="hidden" name="id" id="catId">
                         <div class="form-group">
                             <label for="recipient-name" class="control-label">分类名称:</label>
-                            <input type="text" class="form-control" id="catName">
+                            <input type="text" class="form-control" id="catName" name="name">
                         </div>
                         <div class="form-group">
                             <label for="message-text" class="control-label">分类别名:</label>
-                            <input type="text" class="form-control" id="catSlug">
+                            <input type="text" class="form-control" id="catSlug" name="slug">
                         </div>
                     </form>
                 </div>
@@ -135,8 +137,7 @@
             <td>{{v.name}}</td>
             <td>{{v.slug}}</td>
             <td class="text-center">
-                <a href="javascript:editTr({&quot;id&quot;:&quot;1&quot;,&quot;slug&quot;:&quot;uncategorized&quot;,&quot;name&quot;:&quot;未分类&quot;});"
-                    class="btn btn-info btn-xs">编辑</a>
+                <a href="#" data-id="{{v.id}}" class="btn btn-info btn-xs">编辑</a>
                 <a href="#" data-id="{{v.id}}" class="btn btn-danger btn-xs btn-del">删除</a>
             </td>
        </tr>
@@ -186,55 +187,58 @@
                         }
                     }
                 })
+                $('#addModal').modal('hide');
+
             }
             getData()
 
-
             // 新增文章类别
-            $('#model_add').on('click', function () {
+            function addCate() {
+                $('#model_add').on('click', function () {
 
-                var catName = $('#catName').val().trim()
-                var catSlug = $('#catSlug').val().trim()
+                    var catName = $('#catName').val().trim()
+                    var catSlug = $('#catSlug').val().trim()
 
-                if (catName == '' || catSlug == '') {
+                    if (catName == '' || catSlug == '') {
 
-                    $('#myModal').modal();
+                        $('#myModal').modal();
 
-                    $('.btn-confirm').click(function () {
-                        $('#myModal').modal('hide');
+                        $('.btn-confirm').click(function () {
+                            $('#myModal').modal('hide');
 
-                    })
-                }
-
-                $.post({
-                    url: 'http://localhost:8000/admin/category_add',
-                    data: {
-                        name: catName,
-                        slug: catSlug
-                    },
-                    success: function (res) {
-                        // console.log(res);
-                        // 1.  location.reload()
-
-                        // 2.  重新发送ajax请求
-                        getData();
-
-                        // 3. 直接操作DOM树
-                        // if (res.code == 200) {
-                        //     var obj = {
-                        //         name: catName,
-                        //         slug: catSlug
-                        //     }
-                        //     var catename = template('tpl02', obj)
-                        //     $('tbody').append(catename)
-
-                        // }
+                        })
                     }
+
+                    $.post({
+                        url: 'http://localhost:8000/admin/category_add',
+                        data: {
+                            name: catName,
+                            slug: catSlug
+                        },
+                        success: function (res) {
+                            // console.log(res);
+                            // 1.  location.reload()
+
+                            // 2.  重新发送ajax请求
+                            getData();
+
+                            // 3. 直接操作DOM树
+                            // if (res.code == 200) {
+                            //     var obj = {
+                            //         name: catName,
+                            //         slug: catSlug
+                            //     }
+                            //     var catename = template('tpl02', obj)
+                            //     $('tbody').append(catename)
+
+                            // }
+                        }
+                    })
+
+                    $('#addModal').modal('hide');
+
                 })
-
-                $('#addModal').modal('hide');
-
-            })
+            }
 
             // 弹出框
             $('#model_shutoff').click(function () {
@@ -243,30 +247,97 @@
             });
 
 
+            //给弹出来的模态框里面的 新增或者编辑 按钮设置点击事件.
+            $('#model_add').on('click', function () {
+                if ($(this).hasClass('btn-success')) {
+                    // 编辑用户要修改的事情
+                    var name = $('#catName').val();
+                    var slug = $('#catSlug').val();
+                    var id = $('#catId').val();
+                    // console.log(id, slug, name);
+
+                    // 弹出框获取成功,发送ajax请求
+
+                    // serialize和formData方法差不多,只是serialize得到的是字符串,也要通过input的name属性来获取
+                    var data = $('.modal-body form').serialize();
+                    // console.log(data);
+
+                    $.ajax({
+                        type: 'post',
+                        url: 'http://localhost:8000/admin/category_edit',
+                        data: data,
+                        success: function (res) {
+                            // console.log(res);
+                            if (res.code == 200) {
+                                alert('修改成功!')
+                                getData()
+                            }
+
+                        }
+                    })
+
+                } else {
+                    // 做新增的事情
+                    addCate()
+                }
+
+            })
+
+
+
             // 删除文章类别
             $('tbody').on('click', '.btn-del', function (e) {
                 e.preventDefault()
 
-                var that = $(this);
-                var delID = $(this).attr('data-id')
-                // console.log(delID)
-                $.ajax({
-                    type: 'post',
-                    url: 'http://localhost:8000/admin/category_delete',
-                    data: { id: delID },
-                    success: function (res) {
-                        // console.log(res);
-                        if (res.code == 200) {
-                            if (confirm('确认删除?')) {
+                if (confirm('确认删除?')) {
+                    var that = $(this);
+                    var delID = $(this).attr('data-id')
+                    // console.log(delID)
+
+                    $.ajax({
+                        type: 'post',
+                        url: 'http://localhost:8000/admin/category_delete',
+                        data: { id: delID },
+                        success: function (res) {
+                            // console.log(res);
+                            if (res.code == 200) {
                                 that.parents('tr').remove();
                             }
                         }
-
-                    }
-                })
-
+                    })
+                }
             })
 
+            // 编辑文章类别
+            $('tbody').on('click', '.btn-info', function (e) {
+
+                e.preventDefault()
+
+                if ($(this).hasClass('btn-info')) {
+                    $('#addModal .modal-title').html('修改分类');
+                    $('#model_add').text('修改').addClass('btn-success');
+                    $('#addModal').modal('show');
+
+                    // 获取要编辑的内容,id name slug
+                    var id = $(this).attr('data-id')
+                    // console.log(id);
+                    var catName = $(this).parent().prev().prev().text();
+                    // console.log(catName);
+                    var catSlug = $(this).parent().prev().text();
+                    // console.log(catSlug);
+
+                    $('#catId').val(id);
+                    $('#catName').val(catName);
+                    $('#catSlug').val(catSlug);
+                }
+            })
+
+
+            // 新增分类的模态框复原
+            $('#btnAddCate').on('click', function () {
+                $('#addModal .modal-title').html('新增分类');
+                $('#model_add').text('新增').removeClass('btn-success');
+            })
 
 
         })
