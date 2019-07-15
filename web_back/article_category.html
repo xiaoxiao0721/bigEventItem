@@ -274,15 +274,12 @@
                                 alert('修改成功!')
                                 getData()
                             }
-
                         }
                     })
-
                 } else {
                     // 做新增的事情
                     var catName = $('#catName').val().trim()
                     var catSlug = $('#catSlug').val().trim()
-
                     if (catName == '' || catSlug == '') {
 
                         $('#myModal').modal();
@@ -292,7 +289,6 @@
 
                         })
                     }
-
                     $.post({
                         url: 'http://localhost:8000/admin/category_add',
                         data: {
@@ -301,18 +297,11 @@
                         },
                         success: function (res) {
                             getData();
-
                         }
                     })
-
                     $('#addModal').modal('hide');
-
                 }
-
             })
-
-
-
 
             // 删除文章类别
             $('tbody').on('click', '.btn-del', function (e) {
@@ -322,7 +311,6 @@
                     var that = $(this);
                     var delID = $(this).attr('data-id')
                     // console.log(delID)
-
                     $.ajax({
                         type: 'post',
                         url: 'http://localhost:8000/admin/category_delete',
