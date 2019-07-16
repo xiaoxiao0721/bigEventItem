@@ -222,14 +222,14 @@
     <script type="text/html" id="art_list">
         {{each data v}}
         <tr>
-            <td>{{v.title}}</td>
+            <td class='data_title'>{{v.title}}</td>
             <td>{{v.author}}</td>
             <td>{{v.type}}</td>
             <td class="text-center">{{v.date}}</td>
             <td class="text-center">{{v.state}}</td>
             <td class="text-center">
-                <a href="article_edit.html"  data-id='{{v.id}}' class="btn btn-default btn-xs">编辑</a>
-                <a href="#" data-id='{{v.id}}' class="btn btn-danger btn-xs">删除</a>
+                <a href="#"  data-id='{{v.id}}' class="btn btn-default btn-xs btn-edit">编辑</a>
+                <a href="#" data-id='{{v.id}}' class="btn btn-danger btn-xs btn-del">删除</a>
             </td>
         </tr>
         {{/each}}
@@ -282,7 +282,7 @@
 
                             var totalPages = res.totalPage;
                             // console.log(totalPages);
-                            
+
                             if (MytotalPages != totalPages) {
                                 MytotalPages = totalPages;
                                 var currentPage = $pagination.twbsPagination('getCurrentPage');
@@ -313,11 +313,53 @@
             };
             $pagination.twbsPagination(defaultOpts);
 
-
             //需求: 一进到文章列表页面,就显示所有的文章.
             // $('#btnSearch').trigger('click');
 
+            // 4. 需求:删除发表的文章
+            $('tbody').on('click', '.btn-del', function (e) {
+                e.preventDefault()
+                var dataId = $(this).attr('data-id');
+                // console.log(dataId);
 
+                var that = $(this);
+                // console.log(that);
+                if (confirm('确认删除?')) {
+                    $.ajax({
+                        url: 'http://localhost:8000/admin/article_delete',
+                        data: { id: dataId },
+                        success: function (res) {
+                            // console.log(res);
+                            if (res.code == 200) {
+                                that.parents('tr').remove()
+                                getData(1);
+                            }
+                        }
+                    })
+                }
+            })
+
+            // 5. 编辑按钮的点击事件
+            $('tbody').on('click', '.btn-edit', function () {
+
+                var id = $(this).attr('data-id');
+                // console.log(id);
+
+                $.ajax({
+                    url: 'http://localhost:8000/admin/search',
+                    data: { id: id },
+                    success: function (res) {
+                        // console.log(res);
+                        if (res.code == 200) {
+                            // console.log(res.data.id);
+                            
+                            location.href = 'article_edit.html?id=' + res.data.id
+                        }
+
+                    }
+                })
+
+            })
 
         })
 

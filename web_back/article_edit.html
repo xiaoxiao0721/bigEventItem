@@ -27,20 +27,20 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章标题：</label>
                     <div class="col-sm-10">
-                        <input type="email" class="form-control" id="inputEmail3" value="文章标题文字">
+                        <input type="email" name="title" class="form-control" id="inputEmail3" value="文章标题文字">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">文章封面：</label>
                     <div class="col-sm-10">
-                        <img src="images/pic06.jpg" class="article_cover">
-                        <input type="file" id="exampleInputFile">
+                        <img src="./images/2.jpg" class="article_cover" style="width:50px;height: 50px">
+                        <input type="file" name="cover" id="exampleInputFile">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章类别：</label>
                     <div class="col-sm-4">
-                        <select class="form-control">
+                        <select class="form-control form_type" name="type">
                             <option>类别一</option>
                             <option>类别二</option>
                             <option>类别三</option>
@@ -54,7 +54,7 @@
                     <div class="col-sm-4">
 
                         <div class="input-group">
-                            <input type="text" class="form-control" value="2019-05-17" id="dateinput">
+                            <input type="text" class="form-control " name="date" value="2019-05-17" id="dateinput">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button"
                                     onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
@@ -66,18 +66,101 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" id="rich_content" name="content" placeholder="文章内容" value="文章内容">
+                        <input type="text"  class="form-control" id="rich_content"  placeholder="文章内容"
+                            value="文章内容">
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-success">修改</button>
+                        <button type="submit" class="btn btn-success btn-edit">修改</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 
+    <script src="./js/template-web.js"></script>
+    <script type="text/html" id="cate_info">
+        {{each data v}}
+
+        <option value='{{v.id}}'>{{v.name}}</option>
+
+        {{/each}}</script>
+
+    <script>
+
+        $(function () {
+
+            // 1.获取所有文章分类
+            $.get({
+                url: 'http://localhost:8000/admin/category_search',
+                success: function (res) {
+                    // console.log(res);
+                    if (res.code == 200) {
+                        var html = template('cate_info', res)
+                        $('.form_type').html(html)
+                    }
+                }
+            })
+
+
+            // 2. 一进入就发送ajax请求,获取当前这个id对应的值
+            // 获取id
+            var id= location.search.split('=')[1];
+            // console.log(id);
+            $.ajax({
+                url: 'http://localhost:8000/admin/search',
+                data: { id: id },
+                success: function (res) {
+                    // console.log(res);
+                    if (res.code == 200) {
+                        // console.log(res);
+                        $('#inputEmail3').val(res.data.title)
+                        $('#dateinput').val(res.data.date)
+                        $('#rich_content').val(res.data.content)
+                        $('.article_cover').attr('src', res.data.cover)
+                    }
+
+                }
+            })
+
+
+            // 3. 文章编辑
+            $('.btn-edit').on('click',function(){
+
+                // 获取值   
+                var title = $('#inputEmail3').val();
+                var cover=$('.article_cover').attr('src');
+                var type= $('.form_type').val();   
+                
+                var date = $('#dateinput').val();
+                var content=tinyMCE.activeEditor.getContent();
+                // console.log(tit,cover,typeId,date,content);
+
+                $.ajax({
+                    type:"post",
+                    url:'http://localhost:8000/admin/article_edit',
+                    data:{
+                        id:id,
+                        title:title,
+                        cover:cover,
+                        type:type,
+                        date:date,
+                        content:content
+                    },
+                    success:function(res){
+                        console.log(res);
+                        
+                    }
+
+
+                })
+
+            })
+
+        })
+
+    </script>
 </body>
 
 </html>
