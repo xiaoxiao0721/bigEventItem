@@ -11,8 +11,10 @@
     <link rel="stylesheet" href="css/iconfont.css">
     <link rel="stylesheet" href="css/main.css">
     <link type="text/css" rel="stylesheet" href="js/jedate/css/jedate.css">
+    <link rel="stylesheet" href="./test/jeDate-test.css">
     <script src="js/jquery-1.12.4.min.js"></script>
     <script src="js/jedate/js/jedate.js"></script>
+    <script src="./js/moment.js"></script>
     <script src="js/tinymce/js/tinymce/tinymce.min.js"></script>
     <script src="js/tinymce/js/tinymce_setup.js"></script>
 </head>
@@ -33,13 +35,17 @@
                 <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">文章封面：</label>
                     <div class="col-sm-10">
-                        <input type="file" id="exampleInputFile">
+                        <img src="./images/2.jpg" alt="" style="width: 100px;">
+                        <input type="file" id="exampleInputFile" style="display:none"><br>
+                        <label for="exampleInputFile">
+                            <img src="./images/uploadFileIcon.png" alt="" style="cursor:pointer;width:50px">
+                        </label>
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章类别：</label>
                     <div class="col-sm-4">
-                        <select class="form-control">
+                        <select class="form-control form_cate">
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
@@ -51,13 +57,13 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">发布时间：</label>
                     <div class="col-sm-4">
-
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="YYYY-MM-DD" id="dateinput">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button"
-                                    onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
-                                        class="iconfont icon-icondate"></i></button>
+                                    onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})">
+                                    <i class="iconfont icon-icondate"></i>
+                                </button>
                             </span>
                         </div>
                     </div>
@@ -80,6 +86,69 @@
         </div>
     </div>
 
+    <!-- <div class="jeitem">
+        <label class="jelabel">发布日期:</label>
+        <div class="jeinpbox">
+            <input type="text" class="jeinput" id="testico" placeholder="YYYY-MM-DD">
+            <div class="icons jebtns" onclick="jeDate('#testico',{trigger:false,format: 'YYYY-MM-DD'})">
+            </div>
+        </div>
+    </div> -->
+    <!-- <div class="itemdemo">
+        <span class="datetxt fl je-mr8">蓝色主题色</span>
+        <div class="jeinpbox">
+            <input type="text" class="dateinput dateicon je-mr25" id="theme01" placeholder="YYYY-MM-DD"
+                readonly="">
+        </div>
+    </div> -->
+
+    <script src="./js/template-web.js"></script>
+    <!-- 准备一个模板 -->
+    <script type="text/html" id="tpl">
+        {{each data v}}
+
+           <option value="{{v.id}}">{{v.name}}</option>
+
+        {{/each}}
+    </script>
+    <script>
+        // 入口函数
+        $(function () {
+
+            // 文件获取并预览
+            $('#exampleInputFile').on('change', function () {
+                var url = URL.createObjectURL(this.files[0]);
+                // console.log(url);
+                $(this).prev().attr('src', url);
+
+            })
+
+            // 获取文章类别
+            $.ajax({
+                url: 'http://localhost:8000/admin/category_search',
+                success: function (res) {
+                    // console.log(res);
+                    var resHtml = template('tpl', res)
+                    $('.form_cate').html(resHtml)
+                }
+            })
+
+            // 蓝色主题色
+            // jeDate("#theme01", {
+            //     theme: { bgcolor: "#00A1CB", color: "#ffffff", pnColor: "#00CCFF" },
+            //     format: "YYYY-MM-DD hh:mm:ss"
+            // });
+
+            // 获取当前日期
+            var currentDate = moment().format('YYYY-MM-DD');
+            // console.log(currentDate);
+            $('#dateinput').val(currentDate)
+
+            
+
+        })
+
+    </script>
 </body>
 
 </html>
