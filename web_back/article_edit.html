@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>文章列表</title>
+    <title>文章编辑</title>
     <link rel="stylesheet" href="js/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/iconfont.css">
@@ -54,12 +54,12 @@
                     <div class="col-sm-4">
 
                         <div class="input-group">
-                            <input type="text" class="form-control " name="date" value="2019-05-17" id="dateinput">
-                            <span class="input-group-btn">
+                            <input type="text" class="form-control"  disabled name="date" value="2019-05-17" id="dateinput">
+                            <!-- <span class="input-group-btn">
                                 <button class="btn btn-default" type="button"
                                     onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
                                         class="iconfont icon-icondate"></i></button>
-                            </span>
+                            </span> -->
                         </div>
                     </div>
                 </div>
@@ -91,7 +91,7 @@
 
         $(function () {
 
-            // 1.获取所有文章分类
+            // 1.获取所有文章分类(模板)
             $.get({
                 url: 'http://localhost:8000/admin/category_search',
                 success: function (res) {
@@ -119,6 +119,7 @@
                         $('#dateinput').val(res.data.date)
                         $('#rich_content').val(res.data.content)
                         $('.article_cover').attr('src', res.data.cover)
+                        $('.form_type').val(res.data.type)
                     }
 
                 }
@@ -126,36 +127,36 @@
 
 
             // 3. 文章编辑
-            $('.btn-edit').on('click',function(){
-
+            $('.btn-edit').on('click',function(e){
+                // form表单的submit按钮会有一个默认跳转
+                e.preventDefault();
                 // 获取值   
-                var title = $('#inputEmail3').val();
-                var cover=$('.article_cover').attr('src');
-                var type= $('.form_type').val();   
-                
-                var date = $('#dateinput').val();
-                var content=tinyMCE.activeEditor.getContent();
-                // console.log(tit,cover,typeId,date,content);
+                var  fm  =new FormData($('form')[0]);
+                fm.append('id',id);
+                fm.append('content',tinyMCE.activeEditor.getContent());
 
                 $.ajax({
                     type:"post",
                     url:'http://localhost:8000/admin/article_edit',
-                    data:{
-                        id:id,
-                        title:title,
-                        cover:cover,
-                        type:type,
-                        date:date,
-                        content:content
-                    },
+                    data:fm,
+                    contentType:false,
+                    processData:false,
                     success:function(res){
-                        console.log(res);
+                        // console.log(res);
+                        if(res.code==200){
+                            alert('修改成功')
+                        }
                         
                     }
-
-
                 })
 
+            })
+
+              // 编辑图片预览
+              $('#exampleInputFile').on('change',function(){
+                var url = URL.createObjectURL(this.files[0]);
+                // console.log(url);
+                $('.article_cover').attr('src',url);
             })
 
         })

@@ -228,7 +228,7 @@
             <td class="text-center">{{v.date}}</td>
             <td class="text-center">{{v.state}}</td>
             <td class="text-center">
-                <a href="#"  data-id='{{v.id}}' class="btn btn-default btn-xs btn-edit">编辑</a>
+                <a href="article_edit.html?id={{v.id}}" class="btn btn-default btn-xs btn-edit">编辑</a>
                 <a href="#" data-id='{{v.id}}' class="btn btn-danger btn-xs btn-del">删除</a>
             </td>
         </tr>
@@ -254,6 +254,9 @@
             $('#btnSearch').on('click', function (e) {
 
                 e.preventDefault();
+
+                // 点击筛选,触发首页的点击事件
+                $('.page-link').trigger('click');
                 getData(1)
             })
 
@@ -282,10 +285,10 @@
 
                             var totalPages = res.totalPage;
                             // console.log(totalPages);
+                            window.currentPage = $pagination.twbsPagination('getCurrentPage');
 
                             if (MytotalPages != totalPages) {
                                 MytotalPages = totalPages;
-                                var currentPage = $pagination.twbsPagination('getCurrentPage');
                                 $pagination.twbsPagination('destroy');
                                 $pagination.twbsPagination($.extend({}, defaultOpts, {
                                     startPage: 1,
@@ -331,8 +334,8 @@
                         success: function (res) {
                             // console.log(res);
                             if (res.code == 200) {
-                                that.parents('tr').remove()
-                                getData(1);
+                                // that.parents('tr').remove()
+                                getData(currentPage);
                             }
                         }
                     })
@@ -340,26 +343,26 @@
             })
 
             // 5. 编辑按钮的点击事件
-            $('tbody').on('click', '.btn-edit', function () {
+            // $('tbody').on('click', '.btn-edit', function () {
 
-                var id = $(this).attr('data-id');
-                // console.log(id);
+            //     var id = $(this).attr('data-id');
+            //     // console.log(id);
 
-                $.ajax({
-                    url: 'http://localhost:8000/admin/search',
-                    data: { id: id },
-                    success: function (res) {
-                        // console.log(res);
-                        if (res.code == 200) {
-                            // console.log(res.data.id);
+            //     $.ajax({
+            //         url: 'http://localhost:8000/admin/search',
+            //         data: { id: id },
+            //         success: function (res) {
+            //             // console.log(res);
+            //             if (res.code == 200) {
+            //                 // console.log(res.data.id);
                             
-                            location.href = 'article_edit.html?id=' + res.data.id
-                        }
+            //                 location.href = 'article_edit.html?id=' + res.data.id
+            //             }
 
-                    }
-                })
+            //         }
+            //     })
 
-            })
+            // })
 
         })
 
