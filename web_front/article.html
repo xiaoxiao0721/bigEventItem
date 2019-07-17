@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="css/reset.css">
     <link rel="stylesheet" href="css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
+    <script src="./js/jquery-1.12.4.min.js"></script>
 </head>
 
 <body>
@@ -205,6 +206,45 @@
         <p>电话：0755-****888 粤ICP备*******8号</p>
     </div>
 
+    <!-- 导入模板 -->
+    <script src="./js/template-web.js"></script>
+    <!-- 准备一个模板 -->
+    <script type="text/html" id="tpl_article">
+        {{author}} 发布于 {{date}}&nbsp;&nbsp;&nbsp;分类:{{type}}&nbsp;&nbsp;&nbsp;阅读:
+        ({{read}})&nbsp;&nbsp;&nbsp;评论: ({{comment}})
+    </script>
+    <script>
+
+        $(function () {
+
+            // 通过url截取id
+            var id = location.search.split('=')[1];
+            // console.log(id);
+
+            // 发送ajax请求获取内容
+            $.ajax({
+                url: 'http://localhost:8000/admin/search',
+                data: {
+                    id: id
+                },
+                success: function (res) {
+                    // console.log(res);
+                    if (res.code == 200) {
+                        $('.article_title').html(res.data.title);
+                        $('.article_con').html(res.data.content);
+                        var resHtml = template('tpl_article', res.data);
+                        // console.log(resHtml);
+                        $('.article_info').html(resHtml);
+
+                    }
+
+                }
+            })
+
+
+        })
+
+    </script>
 </body>
 
 </html>
